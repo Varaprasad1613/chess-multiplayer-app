@@ -1,0 +1,11 @@
+asgiref==3.8.1
+chess==1.11.0
+Django==4.2.16
+python-chess==1.999
+sqlparse==0.5.1
+typing_extensions==4.12.2
+channels-redis==4.1.0
+channels==4.0.0
+channels-redis==4.1.0
+daphne==4.0.0
+

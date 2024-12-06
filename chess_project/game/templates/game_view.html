@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+    {% block title %}Multiplayer Chess{% endblock %}
+    {% block extra_styles %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+    
+        .main-container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1200px;
+            margin: 20px auto;
+            background: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    
+        .active-users {
+            flex: 0 0 40%; 
+            margin-right: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .game-history {
+            flex: 1; 
+            overflow-y: auto;
+            max-height: 500px; 
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background-color: #ffffff;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+            font-size: 1em;
+            padding: 12px;
+            border: 1px solid #dee2e6;
+            text-align: center;
+        }
+
+        td {
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            text-align: center;
+            font-size: 0.9em;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            margin: 0 5px; 
+        }
+
+        .btn-primary {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #138496;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        .action-buttons {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .delete-form {
+            margin: 0;
+            display: inline-block
+        }
+
+    </style>
+    {% endblock %}
+
+    {% block content %}
+    <h1>Multiplayer Chess</h1>
+    <p>{{ test_value }}</p>
+    <p>Total games: {{ user_games_with_opponents|length }}</p>
+
+
+    <div class="main-container">
+        <!-- Active Users List -->
+        <div class="active-users">
+            <h2>Active Users (not playing)</h2>
+            <ul id="active-users-list">
+
+            </ul>
+        </div>
+
+<div class="game-history">
+    <h2>Your Game History</h2>
+    {% if user_games_with_opponents %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Opponent</th>
+                    <th>Moves</th>
+                    <th>Outcome</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in user_games_with_opponents %}
+                    <tr>
+                        <td>{{ item.opponent.username }}</td>
+                        <td>{{ item.player_move_count }}</td> 
+                        <td>
+                            {% if item.game.game_status == 'ended' %}
+                                {% if item.game.player1 == request.user and 'won' in item.game.game_status %}
+                                    Win
+                                {% elif item.game.player2 == request.user and 'won' in item.game.game_status %}
+                                    Loss
+                                {% else %}
+                                    Tie
+                                {% endif %}
+                            {% else %}
+                                {{ item.game.game_status }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{% url 'edit_game' item.game.id %}" class="btn btn-primary">Edit</a>
+                        
+                                <form action="{% url 'delete_game' item.game.id %}" method="post" class="delete-form">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this game?');">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No games played yet.</p>
+    {% endif %}
+</div>
+
+
+
+    <!-- Modal for Invites -->
+    <div id="overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;"></div>
+    <div id="invite-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); z-index: 1000;">
+
+    </div>
+    {% endblock %}
+
+    {% block extra_scripts %}
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+        const lobbySocket = new WebSocket(`${wsScheme}://${window.location.host}/ws/lobby/`);
+    
+        lobbySocket.onopen = function(e) {
+            console.log('WebSocket connected.');
+            lobbySocket.send(JSON.stringify({'action': 'fetch_active_users'}));
+        };
+    
+        lobbySocket.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+    console.log('Received:', data);
+
+    if (data.action === 'active_users') {
+        updateActiveUsers(data.active_users);
+    } else if (data.action === 'receive_invite') {
+        showInviteModal(data);
+    } else if (data.action === 'start_game') {
+        window.location.href = '/game/' + data.game_id + '/';
+    } else if (data.action === 'invite_declined') {
+        alert(`${data.receiver} declined your invite.`);
+    } else if (data.action === 'invite_sent') {
+        alert(data.message);
+    } else if (data.action === 'game_status') {
+        if (data.status === 'active') {
+            window.location.href = '/game/' + data.game_id + '/';
+        }
+    } else if (data.error) {
+        alert('Error: ' + data.error);
+    }
+};
+    
+        lobbySocket.onclose = function(e) {
+            console.error('WebSocket closed unexpectedly.');
+        };
+    
+        function updateActiveUsers(activeUsers) {
+            const usersList = $('#active-users-list');
+            usersList.empty();
+            if (activeUsers.length > 0) {
+                activeUsers.forEach(user => {
+                    const listItem = `<li data-user-id="${user.id}">
+                        ${user.username} 
+                        <button class="invite-btn" data-user-id="${user.id}">Challenge</button>
+                    </li>`;
+                    usersList.append(listItem);
+                });
+            } else {
+                usersList.append('<li>No active users available</li>');
+            }
+        }
+    
+        $(document).on('click', '.invite-btn', function() {
+            const userId = $(this).data('user-id');
+            console.log('Sending invite to user ID:', userId);
+            lobbySocket.send(JSON.stringify({
+                'action': 'send_invite',
+                'user_id': userId
+            }));
+        });
+    
+        function showInviteModal(data) {
+            const sender = data.sender;
+            const inviteId = data.invite_id;
+            $('#invite-modal').show();
+            $('#overlay').show();
+            $('#invite-modal').html(`
+                <h3>${sender} has challenged you to play!</h3>
+                <button id="accept-btn">Accept</button>
+                <button id="decline-btn">Decline</button>
+            `);
+            $('#accept-btn').click(function() {
+                respondToInvite(inviteId, 'accept');
+            });
+            $('#decline-btn').click(function() {
+                respondToInvite(inviteId, 'decline');
+            });
+        }
+    
+        function respondToInvite(inviteId, response) {
+            lobbySocket.send(JSON.stringify({
+                'action': 'respond_invite',
+                'invite_id': inviteId,
+                'response': response
+            }));
+            $('#invite-modal').hide();
+            $('#overlay').hide();
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('deleted')) {
+        alert('Game deleted successfully.');
+    }
+
+        
+    
+        setInterval(function() {
+            lobbySocket.send(JSON.stringify({'action': 'check_game_status'}));
+        }, 5000); 
+    </script>
+    {% endblock %}
+

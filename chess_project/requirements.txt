@@ -1,0 +1,16 @@
+asgiref==3.8.1
+beautifulsoup4==4.12.3
+Django==4.2.16
+django-bootstrap4==24.4
+gitdb==4.0.11
+GitPython==3.1.41
+setuptools==69.0.3
+smmap==5.0.1
+soupsieve==2.6
+sqlparse==0.5.1
+psycopg2-binary==2.9.9
+python-chess==1.999
+channels==4.0.0
+channels-redis==4.1.0
+daphne==4.0.0
+channels-redis==4.1.0

@@ -1,0 +1,102 @@
+body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+}
+
+.main-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 1200px;
+}
+
+#game-info {
+    width: 25%;
+    margin-right: 20px;
+}
+
+#chessboard-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 70%;
+}
+
+table {
+    border: 1px solid black;
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+td {
+    background: chocolate;
+    width: 60px;
+    height: 60px;
+    border: 1px solid black;
+    font-size: 40px;
+    text-align: center;
+}
+
+th {
+    background-color: tan; 
+    font-size: 1.5em;
+}
+
+tr:nth-child(even) td:nth-child(odd), tr:nth-child(odd) td:nth-child(even) {
+    background: tan;
+}
+
+button {
+    padding: 8px 16px;
+    border: none;
+    cursor: pointer;
+    margin: 5px;
+}
+
+#moveBtn {
+    background-color: green;
+    color: white;
+}
+
+
+#exitBtn {
+    background-color: red;
+    color: white;
+}
+button:hover {
+    opacity: 0.8;
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+    align-items: center;
+}
+
+.logout-container {
+    margin-top: 20px;
+}
+
+.logout-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.9em;
+}
+
+.logout-button:hover {
+    background-color: #0056b3;
+}
