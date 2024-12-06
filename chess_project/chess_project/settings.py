@@ -33,6 +33,7 @@ CSRF_TRUSTED_ORIGINS = ['https://localhost:8000', 'https://localhost:80', 'https
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
