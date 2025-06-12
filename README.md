@@ -1,6 +1,27 @@
-# 620-P2-Starter
-- Follow the instructions given in Canvas (Projects > Project 2: Implementation) to create a new Django project at the root of this repository.
-- Be sure to also read though the requirements listed in Project 2: Report and Project 2: Demo Video before starting to implement Project 2.
-- It is highly recommended to use GitHub Codespaces as your develeopment environment for the implementation of Project 2, but if you decide to use an alternate development environment, be sure to use Python version 3.12.x & Django version 4.2.x.
-- To access Codespaces, within this github repository, under the green Code button, select the CodeSpaces tab, and then select "Create codespaces on main".  It will take a few minutes for the VM to spin up the first time. 
-- Commit and push your work-in-progress regularly to avoid losing work. 
+# Chess Multiplayer Web Application
+
+This is a real-time, multiplayer chess web application built using Django, Django Channels, and WebSockets. The game supports login/logout, game invites, turn-based play, game history, journaling, and deployment on Google Cloud Platform. Developed as part of the CSCI 620 Full Stack Web Development course.
+
+## Features
+
+- User registration, login, and logout functionality
+- Real-time multiplayer chess with move validation via python-chess
+- Invite and challenge other logged-in players
+- Turn indicator and resign option
+- Game restrictions: one game per user at a time
+- Game history tracking: moves, outcomes, and opponent
+- Journal entry feature for completed games
+- Option to delete game history with confirmation modal
+- Static pages: Rules, About, and History (publicly viewable)
+- Organized static files (CSS, JS, fonts, images)
+- Responsive layout using Bootstrap grid system
+
+## Technology Stack
+
+- **Backend**: Django, Django Channels, python-chess
+- **Frontend**: HTML, CSS, JavaScript, Bootstrap
+- **Database**: PostgreSQL
+- **Real-time Communication**: WebSockets (via Django Channels)
+- **Deployment**: Docker, Google Cloud Platform (GCP)
+
+
